@@ -23,6 +23,14 @@ run_doctor() {
     local web_pid=$(lsof -ti tcp:${WEB_PORT} 2>/dev/null || true)
     echo -e "     API Port  : ${API_PORT} $([ -n "$api_pid" ] && echo "${GREEN}ACTIVE (PID ${api_pid})${NC}" || echo "${DIM}IDLE${NC}")"
     echo -e "     Web Port  : ${WEB_PORT} $([ -n "$web_pid" ] && echo "${GREEN}ACTIVE (PID ${web_pid})${NC}" || echo "${DIM}IDLE${NC}")"
+    if [ -n "$REALTIME_PORT" ]; then
+      local rt_pid=$(lsof -ti tcp:${REALTIME_PORT} 2>/dev/null || true)
+      echo -e "     Realtime  : ${REALTIME_PORT} $([ -n "$rt_pid" ] && echo "${GREEN}ACTIVE (PID ${rt_pid})${NC}" || echo "${DIM}IDLE${NC}")"
+    fi
+    if [ -n "$WORKER_PORT" ]; then
+      local wrk_pid=$(lsof -ti tcp:${WORKER_PORT} 2>/dev/null || true)
+      echo -e "     Worker    : ${WORKER_PORT} $([ -n "$wrk_pid" ] && echo "${GREEN}ACTIVE (PID ${wrk_pid})${NC}" || echo "${DIM}IDLE${NC}")"
+    fi
 
     # DB Connection check
     if PGPASSWORD=Yuva1213 "${PSQL_BIN}" -U "${DB_USER}" -h "${DB_HOST}" -p "${DB_PORT}" -d "${DB_NAME}" -c "SELECT 1;" >/dev/null 2>&1; then

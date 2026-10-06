@@ -41,7 +41,10 @@ show_help() {
   echo -e "${BOLD}Configured Applications:${NC}"
   for app in $(list_available_apps); do
     load_app_config "$app"
-    echo -e "  • ${BOLD}${APP_NAME}${NC} (${APP_ID}) ➔ Web :${WEB_PORT} | API :${API_PORT} | DB :${DB_NAME}"
+    local extra=""
+    [ -n "$REALTIME_PORT" ] && extra=" | RT :${REALTIME_PORT}"
+    [ -n "$WORKER_PORT" ] && extra="${extra} | WRK :${WORKER_PORT}"
+    echo -e "  • ${BOLD}${APP_NAME}${NC} (${APP_ID}) ➔ Web :${WEB_PORT} | API :${API_PORT}${extra} | DB :${DB_NAME}"
   done
   echo ""
 }
