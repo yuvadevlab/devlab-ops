@@ -1,0 +1,16 @@
+# ==============================================================================
+# DevLab Ops — Repository Ignore Rules
+# ==============================================================================
+
+# Operating System & Editors
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+.idea/
+.vscode/
+
+# Local Environment Overrides & Temporary Files
+*.local.env
+*.tmp
+*.log

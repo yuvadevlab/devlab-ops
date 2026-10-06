@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -e
+
+# Resolve actual script directory even when invoked via symlink
+TARGET="${BASH_SOURCE[0]}"
+while [ -L "$TARGET" ]; do
+  SCRIPT_PATH="$(cd "$(dirname "$TARGET")" && pwd)"
+  TARGET="$(readlink "$TARGET")"
+  [[ $TARGET != /* ]] && TARGET="$SCRIPT_PATH/$TARGET"
+done
+DIR="$(cd "$(dirname "$TARGET")" && pwd)"
+
+source "${DIR}/lib/config-loader.sh"
+source "${DIR}/lib/runner.sh"
+source "${DIR}/lib/logger.sh"
+source "${DIR}/lib/backup.sh"
+source "${DIR}/lib/updater.sh"
+source "${DIR}/lib/doctor.sh"
+
+show_help() {
+  print_banner "CLI Suite"
+  echo -e "${BOLD}Usage:${NC} ./devlab <command> [app] [options]\n"
+  echo -e "${BOLD}Commands:${NC}"
+  echo -e "  ${CYAN}start${NC} <app>             Start application services with live streaming logs"
+  echo -e "  ${CYAN}stop${NC} <app>              Stop running services and free ports"
+  echo -e "  ${CYAN}update${NC} <app>            Backup DB, pull latest main, migrate & rebuild"
+  echo -e "  ${CYAN}logs${NC} <app> [stream]     Inspect logs (${BOLD}e2e${NC}, error, api, web, http, list)"
+  echo -e "  ${CYAN}backup${NC} [app|all]        Create timestamped gzipped database snapshots"
+  echo -e "  ${CYAN}doctor${NC}                  Run full platform diagnostic & port check"
+  echo -e "  ${CYAN}status${NC}                  Alias for doctor"
+  echo -e "  ${CYAN}help${NC}                    Display this guidance\n"
+  echo -e "${BOLD}Configured Applications:${NC}"
+  for app in $(list_available_apps); do
+    load_app_config "$app"
+    echo -e "  • ${BOLD}${APP_NAME}${NC} (${APP_ID}) ➔ Web :${WEB_PORT} | API :${API_PORT} | DB :${DB_NAME}"
+  done
+  echo ""
+}
+
+COMMAND="$1"
+APP="$2"
+PARAM="$3"
+
+case "$COMMAND" in
+  start|run)
+    run_app "$APP"
+    ;;
+  stop)
+    stop_app "$APP"
+    ;;
+  update)
+    update_app "$APP"
+    ;;
+  logs|log)
+    tail_logs "$APP" "$PARAM"
+    ;;
+  backup)
+    run_backup "${APP:-all}"
+    ;;
+  doctor|status)
+    run_doctor
+    ;;
+  help|--help|-h|"")
+    show_help
+    ;;
+  *)
+    print_error "Unknown command: '${COMMAND}'"
+    echo ""
+    show_help
+    exit 1
+    ;;
+esac
