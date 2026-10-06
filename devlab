@@ -14,20 +14,29 @@ source "${DIR}/lib/config-loader.sh"
 source "${DIR}/lib/runner.sh"
 source "${DIR}/lib/logger.sh"
 source "${DIR}/lib/backup.sh"
+source "${DIR}/lib/restore.sh"
 source "${DIR}/lib/updater.sh"
+source "${DIR}/lib/env-check.sh"
 source "${DIR}/lib/doctor.sh"
+source "${DIR}/lib/stats.sh"
+source "${DIR}/lib/install.sh"
 
 show_help() {
   print_banner "CLI Suite"
-  echo -e "${BOLD}Usage:${NC} ./devlab <command> [app] [options]\n"
-  echo -e "${BOLD}Commands:${NC}"
-  echo -e "  ${CYAN}start${NC} <app>             Start application services with live streaming logs"
+  echo -e "${BOLD}Usage:${NC} devlab <command> [app] [options]\n"
+  echo -e "${BOLD}Lifecycle Commands:${NC}"
+  echo -e "  ${CYAN}start${NC} <app>             Start application services with live streaming logs & health probes"
   echo -e "  ${CYAN}stop${NC} <app>              Stop running services and free ports"
   echo -e "  ${CYAN}update${NC} <app>            Backup DB, pull latest main, migrate & rebuild"
-  echo -e "  ${CYAN}logs${NC} <app> [stream]     Inspect logs (${BOLD}e2e${NC}, error, api, web, http, list)"
+  echo -e "  ${CYAN}logs${NC} <app> [stream]     Inspect logs (${BOLD}e2e${NC}, error, api, web, http, list)\n"
+  echo -e "${BOLD}Data & Disaster Recovery:${NC}"
   echo -e "  ${CYAN}backup${NC} [app|all]        Create timestamped gzipped database snapshots"
+  echo -e "  ${CYAN}restore${NC} <app> [file]    Safely restore database from snapshot (interactive selection)\n"
+  echo -e "${BOLD}Platform Quality & Ops:${NC}"
+  echo -e "  ${CYAN}env${NC} <app>               Audit environment variables & detect secret drift"
   echo -e "  ${CYAN}doctor${NC}                  Run full platform diagnostic & port check"
-  echo -e "  ${CYAN}status${NC}                  Alias for doctor"
+  echo -e "  ${CYAN}stats${NC}                   Inspect log and backup storage consumption"
+  echo -e "  ${CYAN}install${NC}                 Install global CLI symlink (~/.local/bin/devlab) & Zsh completion"
   echo -e "  ${CYAN}help${NC}                    Display this guidance\n"
   echo -e "${BOLD}Configured Applications:${NC}"
   for app in $(list_available_apps); do
@@ -57,8 +66,20 @@ case "$COMMAND" in
   backup)
     run_backup "${APP:-all}"
     ;;
+  restore)
+    run_restore "$APP" "$PARAM"
+    ;;
+  env|env-check)
+    check_env_drift "$APP"
+    ;;
   doctor|status)
     run_doctor
+    ;;
+  stats)
+    show_stats
+    ;;
+  install|setup)
+    install_cli
     ;;
   help|--help|-h|"")
     show_help

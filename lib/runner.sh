@@ -15,6 +15,27 @@ check_and_free_port() {
   fi
 }
 
+poll_readiness() {
+  local url="$1"
+  local name="$2"
+  local max_attempts=30
+  local attempt=1
+  local start_time=$(date +%s)
+
+  while [ $attempt -le $max_attempts ]; do
+    if curl -s -f -m 1 "$url" >/dev/null 2>&1; then
+      local elapsed=$(( $(date +%s) - start_time ))
+      print_success "[${name}] Verified ready (${url}) in ${elapsed}s"
+      return 0
+    fi
+    sleep 0.5
+    attempt=$((attempt + 1))
+  done
+
+  print_warn "[${name}] Still initializing after 15s. Check logs for details."
+  return 1
+}
+
 run_app() {
   local target_app="$1"
   load_app_config "$target_app"
@@ -133,7 +154,14 @@ run_app() {
     }' &
   WEB_PID=$!
 
-  print_success "${APP_NAME} is live! (Press Ctrl+C to stop)"
+  # Asynchronous Health Probes
+  (
+    sleep 1
+    poll_readiness "$HEALTH_URL" "${APP_NAME} API" || true
+    poll_readiness "$WEB_URL" "${APP_NAME} Web" || true
+  ) &
+
+  print_success "${APP_NAME} launched! (Press Ctrl+C to stop)"
   wait
 }
 
