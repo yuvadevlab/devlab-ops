@@ -60,29 +60,34 @@ It bridges the gap between active multi-repo feature engineering and stable, iso
 ## Core Capabilities
 
 ### 1. Process Supervision & Port Protection
-* Automatically inspects configured service ports via `lsof` and safely terminates orphaned processes before booting.
-* Traps termination signals (`SIGINT`, `SIGTERM`, `EXIT`) to guarantee clean, coordinated shutdowns of both API and Web processes without leaving zombie ports.
+
+- Automatically inspects configured service ports via `lsof` and safely terminates orphaned processes before booting.
+- Traps termination signals (`SIGINT`, `SIGTERM`, `EXIT`) to guarantee clean, coordinated shutdowns of both API and Web processes without leaving zombie ports.
 
 ### 2. Startup Readiness Health Probes
-* Rather than declaring a service "live" prematurely, asynchronous health probes poll the configured `HEALTH_URL` and `WEB_URL` until HTTP `200 OK` is returned.
-* Reports exact boot latency in real-time (e.g., `✓ [FinAI API] Verified ready in 1.4s`).
+
+- Rather than declaring a service "live" prematurely, asynchronous health probes poll the configured `HEALTH_URL` and `WEB_URL` until HTTP `200 OK` is returned.
+- Reports exact boot latency in real-time (e.g., `✓ [FinAI API] Verified ready in 1.4s`).
 
 ### 3. Date-Partitioned Stream Splitting
-* High-performance stream multiplexing powered by `awk` that simultaneously:
-  * Emits color-tagged output to the interactive terminal.
-  * Writes a unified, chronological `e2e.log` containing all service logs.
-  * Segregates application logs into `api/api.log` and `web/web.log`.
-  * Isolates warnings and exceptions into dedicated `error.log` files.
-  * Filters HTTP request paths, methods, and durations into `api/http.log`.
-  * Automatically strips ANSI escape sequences for pristine disk files.
+
+- High-performance stream multiplexing powered by `awk` that simultaneously:
+  - Emits color-tagged output to the interactive terminal.
+  - Writes a unified, chronological `e2e.log` containing all service logs.
+  - Segregates application logs into `api/api.log` and `web/web.log`.
+  - Isolates warnings and exceptions into dedicated `error.log` files.
+  - Filters HTTP request paths, methods, and durations into `api/http.log`.
+  - Automatically strips ANSI escape sequences for pristine disk files.
 
 ### 4. Database Snapshotting & Disaster Recovery
-* On-demand and pre-update database snapshots compressed on the fly via `gzip` (~85% disk reduction).
-* Configurable 14-day TTL retention policy that purges obsolete snapshots automatically.
-* Interactive 1-command restore engine that lists backups, takes a pre-restore safety snapshot, terminates active database connections, and restores data safely.
+
+- On-demand and pre-update database snapshots compressed on the fly via `gzip` (~85% disk reduction).
+- Configurable 14-day TTL retention policy that purges obsolete snapshots automatically.
+- Interactive 1-command restore engine that lists backups, takes a pre-restore safety snapshot, terminates active database connections, and restores data safely.
 
 ### 5. Zero-Downtime Safe Updates
-* Updating an app automatically triggers:
+
+- Updating an app automatically triggers:
   1. A pre-flight safety backup.
   2. `git pull origin main` in the target worktree.
   3. Automatic `pnpm install` **only if** `pnpm-lock.yaml` changed.
@@ -90,7 +95,8 @@ It bridges the gap between active multi-repo feature engineering and stable, iso
   5. Full monorepo production rebuild.
 
 ### 6. Environment Drift & Secret Auditing
-* Scans all `.env.example` templates across packages and compares required keys against active production `.env` and `.env.local` files, flagging omissions before runtime failures occur.
+
+- Scans all `.env.example` templates across packages and compares required keys against active production `.env` and `.env.local` files, flagging omissions before runtime failures occur.
 
 ---
 
@@ -101,31 +107,40 @@ The CLI can be executed via `./devlab` from `/production/`, via `./devlab-ops/de
 ### Application Lifecycle
 
 #### `devlab start <app>`
+
 Starts all processes for `<app>` (API and Web) with port verification, date-stamped logging, and readiness health probes:
+
 ```bash
 devlab start finai
 devlab start orchestrai
 ```
 
 #### `devlab stop <app>`
+
 Terminates running processes and frees ports for `<app>`:
+
 ```bash
 devlab stop finai
 ```
 
 #### `devlab update <app>`
+
 Safely updates an application from the latest `main` branch:
+
 ```bash
 devlab update finai
 ```
-*Flow: Pre-backup ➔ Git pull ➔ Lockfile diff check ➔ Migration diff check ➔ Rebuild.*
+
+_Flow: Pre-backup ➔ Git pull ➔ Lockfile diff check ➔ Migration diff check ➔ Rebuild._
 
 ---
 
 ### Real-Time Log Inspection
 
 #### `devlab logs <app> [stream]`
+
 Inspects real-time logs for today's active partition:
+
 ```bash
 # Master end-to-end timeline (API + Web chronologically merged)
 devlab logs finai e2e
@@ -151,7 +166,9 @@ devlab logs finai list
 ### Database & Disaster Recovery
 
 #### `devlab backup [app|all]`
+
 Creates compressed `.sql.gz` snapshots and prunes snapshots older than 14 days:
+
 ```bash
 # Snapshot FinAI database only
 devlab backup finai
@@ -164,11 +181,15 @@ devlab backup all
 ```
 
 #### `devlab restore <app> [snapshot-file]`
+
 Interactively lists and restores a previous database backup:
+
 ```bash
 devlab restore finai
 ```
-*Sample Interactive Flow:*
+
+_Sample Interactive Flow:_
+
 ```text
 ======================================================
    🚀 DevLab Ops — FinAI — Database Restore
@@ -189,7 +210,9 @@ Step 2/2: Restoring database 'finai'...
 ```
 
 #### `devlab sync-db <app> [-y]`
+
 Clones the production database into the local development database (`<app>_dev`) for safe local testing:
+
 ```bash
 # Sync FinAI production data (finai) -> dev database (finai_dev)
 devlab sync-db finai
@@ -200,37 +223,47 @@ devlab sync-db orchestrai
 # Skip confirmation prompt in automated scripts
 devlab sync-db finai -y
 ```
-*Features:*
-* Takes an automatic pre-sync snapshot of your existing dev database before overwriting.
-* Terminates lingering dev connections and resets schema cleanly.
-* Streams data directly over `pg_dump | psql` with zero intermediate disk overhead.
-* Verifies cloned table count matches production.
+
+_Features:_
+
+- Takes an automatic pre-sync snapshot of your existing dev database before overwriting.
+- Terminates lingering dev connections and resets schema cleanly.
+- Streams data directly over `pg_dump | psql` with zero intermediate disk overhead.
+- Verifies cloned table count matches production.
 
 ---
 
 ### Platform Quality & Diagnostics
 
 #### `devlab env <app>`
+
 Audits environment variables against template declarations to prevent configuration drift:
+
 ```bash
 devlab env finai
 devlab env orchestrai
 ```
 
 #### `devlab doctor`
+
 Executes an end-to-end diagnostic check across runtime tools, ports, database connections, and services:
+
 ```bash
 devlab doctor
 ```
 
 #### `devlab stats`
+
 Displays current storage footprint across logs and backup snapshots:
+
 ```bash
 devlab stats
 ```
 
 #### `devlab install`
+
 Installs the global CLI binary symlink (`~/.local/bin/devlab`) and configures rich Zsh shell completion:
+
 ```bash
 ./devlab install
 source ~/.zshrc
@@ -262,6 +295,7 @@ After running `devlab install` and `source ~/.zshrc`, you can use `devlab` globa
      stats     -- Inspect log and backup storage consumption
    ```
 3. **App & Option Tab Completion:**
+
    ```text
    $ devlab start <TAB>
      finai        orchestrai
@@ -269,11 +303,13 @@ After running `devlab install` and `source ~/.zshrc`, you can use `devlab` globa
    $ devlab logs finai <TAB>
      api    e2e    error  http   list   web
    ```
+
 4. **Real-Time Inline Ghost Autosuggestions (Fish-like as you type):**
    Powered by `zsh-autosuggestions` and `zsh-syntax-highlighting` (installed via Homebrew):
-   * As you type, grey ghost text automatically suggests past commands.
-   * Press **Right Arrow (`→`)** or **`End`** to accept the suggestion instantly.
-   * Valid commands highlight in green; typos highlight in red before pressing Enter.
+   - As you type, grey ghost text automatically suggests past commands.
+   - Press **Right Arrow (`→`)** or **`End`** to accept the suggestion instantly.
+   - Press **`Tab`** to open the interactive arrow-key autocompletion menu.
+   - Valid commands highlight in green; typos highlight in red before pressing Enter.
 
 ---
 
@@ -296,17 +332,17 @@ logs/finai/
         └── error.log                     # Next.js SSR exceptions
 ```
 
-* All disk logs are stripped of ANSI color codes for compatibility with standard text processing tools (`grep`, `awk`, `less`).
-* Date partitions older than 14 days are automatically pruned on each application boot.
+- All disk logs are stripped of ANSI color codes for compatibility with standard text processing tools (`grep`, `awk`, `less`).
+- Date partitions older than 14 days are automatically pruned on each application boot.
 
 ---
 
 ## Service Port Matrix
 
-| Service | Environment | Frontend Port | Backend / Gateway Port | Companion Services | Database (Prod) | Database (Dev) |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **FinAI** | Production | `http://localhost:3010` | `http://localhost:4010` | N/A | `finai` (:5432) | `finai_dev` (:5432) |
-| **OrchestrAI** | Production | `http://localhost:3011` | `http://localhost:4011` | RT `:4012`<br>WRK `:4013` | `orchestrai` (:5432) | `orchestrai_dev` (:5432) |
+| Service        | Environment | Frontend Port           | Backend / Gateway Port  | Companion Services        | Database (Prod)      | Database (Dev)           |
+| :------------- | :---------- | :---------------------- | :---------------------- | :------------------------ | :------------------- | :----------------------- |
+| **FinAI**      | Production  | `http://localhost:3010` | `http://localhost:4010` | N/A                       | `finai` (:5432)      | `finai_dev` (:5432)      |
+| **OrchestrAI** | Production  | `http://localhost:3011` | `http://localhost:4011` | RT `:4012`<br>WRK `:4013` | `orchestrai` (:5432) | `orchestrai_dev` (:5432) |
 
 ---
 

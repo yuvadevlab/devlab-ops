@@ -92,17 +92,6 @@ fpath=(~/.zsh/completion $fpath)
 autoload -Uz compinit && compinit -u
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
-
-# Bind Tab to accept ghost autosuggestion if present, otherwise open Tab menu
-_autosuggest_or_tab() {
-  if [ -n "$POSTDISPLAY" ]; then
-    zle autosuggest-accept
-  else
-    zle expand-or-complete
-  fi
-}
-zle -N _autosuggest_or_tab
-bindkey '^I' _autosuggest_or_tab
 RC_EOF
     print_info "Configured Zsh autocompletion in ~/.zshrc"
   fi
