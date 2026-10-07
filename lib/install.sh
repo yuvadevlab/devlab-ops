@@ -41,6 +41,7 @@ _devlab() {
     'logs:Inspect logs (e2e, error, api, web, http)'
     'backup:Create timestamped gzipped database snapshots'
     'restore:Interactive database restore from backup'
+    'sync-db:Clone production database to development for testing'
     'env:Audit environment variables and check for drift'
     'doctor:Run platform diagnostic & port check'
     'stats:Inspect log and backup storage consumption'
@@ -62,7 +63,7 @@ _devlab() {
       ;;
     app)
       case "$words[2]" in
-        start|stop|update|logs|backup|restore|env)
+        start|stop|update|logs|backup|restore|env|sync-db)
           _describe -t apps 'application' apps
           ;;
       esac
@@ -84,7 +85,14 @@ COMP_EOF
 
   # Ensure fpath includes completion directory in .zshrc
   if ! grep -q 'fpath=(~/.zsh/completion' "$zshrc" 2>/dev/null; then
-    echo -e '\nfpath=(~/.zsh/completion $fpath)\nautoload -Uz compinit && compinit -u' >> "$zshrc"
+    cat << 'RC_EOF' >> "$zshrc"
+
+# DevLab Ops CLI autocompletion
+fpath=(~/.zsh/completion $fpath)
+autoload -Uz compinit && compinit -u
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+RC_EOF
     print_info "Configured Zsh autocompletion in ~/.zshrc"
   fi
 

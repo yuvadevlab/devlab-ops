@@ -20,6 +20,7 @@ source "${DIR}/lib/env-check.sh"
 source "${DIR}/lib/doctor.sh"
 source "${DIR}/lib/stats.sh"
 source "${DIR}/lib/install.sh"
+source "${DIR}/lib/sync-db.sh"
 
 show_help() {
   print_banner "CLI Suite"
@@ -31,7 +32,8 @@ show_help() {
   echo -e "  ${CYAN}logs${NC} <app> [stream]     Inspect logs (${BOLD}e2e${NC}, error, api, web, http, list)\n"
   echo -e "${BOLD}Data & Disaster Recovery:${NC}"
   echo -e "  ${CYAN}backup${NC} [app|all]        Create timestamped gzipped database snapshots"
-  echo -e "  ${CYAN}restore${NC} <app> [file]    Safely restore database from snapshot (interactive selection)\n"
+  echo -e "  ${CYAN}restore${NC} <app> [file]    Safely restore database from snapshot (interactive selection)"
+  echo -e "  ${CYAN}sync-db${NC} <app> [-y]      Clone production database to development (<app>_dev) for testing\n"
   echo -e "${BOLD}Platform Quality & Ops:${NC}"
   echo -e "  ${CYAN}env${NC} <app>               Audit environment variables & detect secret drift"
   echo -e "  ${CYAN}doctor${NC}                  Run full platform diagnostic & port check"
@@ -71,6 +73,9 @@ case "$COMMAND" in
     ;;
   restore)
     run_restore "$APP" "$PARAM"
+    ;;
+  sync-db|clone-db|sync|sync-dev|dev-db|devdb)
+    sync_prod_to_dev "$APP" "$PARAM"
     ;;
   env|env-check)
     check_env_drift "$APP"

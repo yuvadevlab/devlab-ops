@@ -187,6 +187,24 @@ Step 2/2: Restoring database 'finai'...
 ✓ Database 'finai' restored successfully!
 ```
 
+#### `devlab sync-db <app> [-y]`
+Clones the production database into the local development database (`<app>_dev`) for safe local testing:
+```bash
+# Sync FinAI production data (finai) -> dev database (finai_dev)
+devlab sync-db finai
+
+# Sync OrchestrAI production data (orchestrai) -> dev database (orchestrai_dev)
+devlab sync-db orchestrai
+
+# Skip confirmation prompt in automated scripts
+devlab sync-db finai -y
+```
+*Features:*
+* Takes an automatic pre-sync snapshot of your existing dev database before overwriting.
+* Terminates lingering dev connections and resets schema cleanly.
+* Streams data directly over `pg_dump | psql` with zero intermediate disk overhead.
+* Verifies cloned table count matches production.
+
 ---
 
 ### Platform Quality & Diagnostics
