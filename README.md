@@ -30,6 +30,7 @@ It bridges the gap between active multi-repo feature engineering and stable, iso
 │   │   ├── logger.sh              # Stream-splitting log multiplexer
 │   │   ├── backup.sh              # Gzip snapshot engine & TTL retention
 │   │   ├── restore.sh             # Interactive disaster recovery engine
+│   │   ├── sync-db.sh             # Production-to-development database cloning engine
 │   │   ├── updater.sh             # Git main pull, lockfile diff & migrations
 │   │   ├── env-check.sh           # Environment drift & secret validator
 │   │   ├── doctor.sh              # Full runtime & database health checker
@@ -229,11 +230,50 @@ devlab stats
 ```
 
 #### `devlab install`
-Installs the global CLI symlink (`~/.local/bin/devlab`) and configures Zsh autocompletion:
+Installs the global CLI binary symlink (`~/.local/bin/devlab`) and configures rich Zsh shell completion:
 ```bash
 ./devlab install
 source ~/.zshrc
 ```
+
+##### 🌟 Global Usage & Terminal Superpowers
+
+After running `devlab install` and `source ~/.zshrc`, you can use `devlab` globally from **any terminal tab or directory** on your machine:
+
+1. **Global Execution Anywhere:**
+   ```bash
+   devlab start finai
+   devlab sync-db finai
+   devlab doctor
+   ```
+2. **Interactive Tab Autocompletion:**
+   Press `<Tab>` after `devlab` or any subcommand to see an interactive menu with descriptions and arrow-key selection:
+   ```text
+   $ devlab <TAB>
+     start     -- Start application services with live streaming logs
+     stop      -- Stop running services and free ports
+     update    -- Backup DB, pull latest main, migrate & rebuild
+     logs      -- Inspect logs (e2e, error, api, web, http)
+     backup    -- Create timestamped gzipped database snapshots
+     restore   -- Interactive database restore from backup
+     sync-db   -- Clone production database to development for testing
+     doctor    -- Run platform diagnostic & port check
+     env       -- Audit environment variables and check for drift
+     stats     -- Inspect log and backup storage consumption
+   ```
+3. **App & Option Tab Completion:**
+   ```text
+   $ devlab start <TAB>
+     finai        orchestrai
+
+   $ devlab logs finai <TAB>
+     api    e2e    error  http   list   web
+   ```
+4. **Real-Time Inline Ghost Autosuggestions (Fish-like as you type):**
+   Powered by `zsh-autosuggestions` and `zsh-syntax-highlighting` (installed via Homebrew):
+   * As you type, grey ghost text automatically suggests past commands.
+   * Press **Right Arrow (`→`)** or **`End`** to accept the suggestion instantly.
+   * Valid commands highlight in green; typos highlight in red before pressing Enter.
 
 ---
 
@@ -263,10 +303,10 @@ logs/finai/
 
 ## Service Port Matrix
 
-| Service | Environment | Frontend Port | Backend / Gateway Port | Database Target |
-| :--- | :--- | :--- | :--- | :--- |
-| **FinAI** | Production | `http://localhost:3010` | `http://localhost:4010` | `finai` (PostgreSQL :5432) |
-| **OrchestrAI** | Production | `http://localhost:3011` | `http://localhost:4011` | `orchestrai` (PostgreSQL :5432) |
+| Service | Environment | Frontend Port | Backend / Gateway Port | Companion Services | Database (Prod) | Database (Dev) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **FinAI** | Production | `http://localhost:3010` | `http://localhost:4010` | N/A | `finai` (:5432) | `finai_dev` (:5432) |
+| **OrchestrAI** | Production | `http://localhost:3011` | `http://localhost:4011` | RT `:4012`<br>WRK `:4013` | `orchestrai` (:5432) | `orchestrai_dev` (:5432) |
 
 ---
 
