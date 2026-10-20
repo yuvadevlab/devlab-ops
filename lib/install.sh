@@ -43,6 +43,7 @@ _devlab() {
     'restore:Interactive database restore from backup'
     'sync-db:Clone production database to development for testing'
     'env:Audit environment variables and check for drift'
+    'guard:Run DevLab Guard against a production app (read-only)'
     'doctor:Run platform diagnostic & port check'
     'stats:Inspect log and backup storage consumption'
     'install:Install global CLI symlink and shell completion'
@@ -63,7 +64,7 @@ _devlab() {
       ;;
     app)
       case "$words[2]" in
-        start|stop|update|logs|backup|restore|env|sync-db)
+        start|stop|update|logs|backup|restore|env|guard|sync-db)
           _describe -t apps 'application' apps
           ;;
       esac

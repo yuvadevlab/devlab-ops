@@ -252,6 +252,15 @@ Executes an end-to-end diagnostic check across runtime tools, ports, database co
 devlab doctor
 ```
 
+#### `devlab guard <app>`
+
+Runs DevLab Guard against the selected production worktree using its CLI entrypoint. This command is read-only and does not request or apply automated patches.
+
+```bash
+devlab guard finai
+devlab guard orchestrai
+```
+
 #### `devlab stats`
 
 Displays current storage footprint across logs and backup snapshots:
@@ -292,6 +301,7 @@ After running `devlab install` and `source ~/.zshrc`, you can use `devlab` globa
      sync-db   -- Clone production database to development for testing
      doctor    -- Run platform diagnostic & port check
      env       -- Audit environment variables and check for drift
+     guard     -- Run DevLab Guard against a production app (read-only)
      stats     -- Inspect log and backup storage consumption
    ```
 3. **App & Option Tab Completion:**
