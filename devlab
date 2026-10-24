@@ -21,6 +21,7 @@ source "${DIR}/lib/doctor.sh"
 source "${DIR}/lib/stats.sh"
 source "${DIR}/lib/install.sh"
 source "${DIR}/lib/sync-db.sh"
+source "${DIR}/lib/guard.sh"
 
 show_help() {
   print_banner "CLI Suite"
@@ -36,6 +37,7 @@ show_help() {
   echo -e "  ${CYAN}sync-db${NC} <app> [-y]      Clone production database to development (<app>_dev) for testing\n"
   echo -e "${BOLD}Platform Quality & Ops:${NC}"
   echo -e "  ${CYAN}env${NC} <app>               Audit environment variables & detect secret drift"
+  echo -e "  ${CYAN}guard${NC} <app>             Run DevLab Guard against a production app (read-only)"
   echo -e "  ${CYAN}doctor${NC}                  Run full platform diagnostic & port check"
   echo -e "  ${CYAN}stats${NC}                   Inspect log and backup storage consumption"
   echo -e "  ${CYAN}install${NC}                 Install global CLI symlink (~/.local/bin/devlab) & Zsh completion"
@@ -79,6 +81,9 @@ case "$COMMAND" in
     ;;
   env|env-check)
     check_env_drift "$APP"
+    ;;
+  guard)
+    run_guard "$APP"
     ;;
   doctor|status)
     run_doctor
