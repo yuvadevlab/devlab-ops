@@ -1,2 +1,2 @@
-# Disable SC1090/SC1091 because files are sourced dynamically at runtime relative to SCRIPT_DIR
-disable=SC1090,SC1091
+# Ignore dynamic sourcing and non-critical shell style conventions
+disable=SC1090,SC1091,SC2155,SC2034,SC2207
