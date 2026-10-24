@@ -349,10 +349,13 @@ logs/finai/
 
 ## Service Port Matrix
 
-| Service        | Environment | Frontend Port           | Backend / Gateway Port  | Companion Services        | Database (Prod)      | Database (Dev)           |
-| :------------- | :---------- | :---------------------- | :---------------------- | :------------------------ | :------------------- | :----------------------- |
-| **FinAI**      | Production  | `http://localhost:3010` | `http://localhost:4010` | N/A                       | `finai` (:5432)      | `finai_dev` (:5432)      |
-| **OrchestrAI** | Production  | `http://localhost:3011` | `http://localhost:4011` | RT `:4012`<br>WRK `:4013` | `orchestrai` (:5432) | `orchestrai_dev` (:5432) |
+| Service           | Environment | Frontend Port           | Backend / Gateway Port  | Companion Services         | Database (Prod)      | Database (Dev)           |
+| :---------------- | :---------- | :---------------------- | :---------------------- | :------------------------- | :------------------- | :----------------------- |
+| **DevLab Portal** | Production  | `http://localhost:3010` | `http://localhost:4010` | N/A                        | `devlab_portal`      | `devlab_portal_dev`      |
+| **FinAI**         | Production  | `http://localhost:3011` | `http://localhost:4011` | N/A                        | `finai` (:5432)      | `finai_dev` (:5432)      |
+| **OrchestrAI**    | Production  | `http://localhost:3012` | `http://localhost:4012` | RT `:4032`<br>WRK `:4033`  | `orchestrai` (:5432) | `orchestrai_dev` (:5432) |
+| **DevLab Logs**   | Production  | `http://localhost:3013` | `http://localhost:4013` | N/A                        | `devlab_logs`        | `devlab_logs_dev`        |
+| **VitalAI**       | Production  | `http://localhost:3014` | `http://localhost:4014` | N/A                        | `vitalai`            | `vitalai_dev`            |
 
 ---
 
