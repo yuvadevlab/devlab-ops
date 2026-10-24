@@ -1,0 +1,2 @@
+# Disable SC1090/SC1091 because files are sourced dynamically at runtime relative to SCRIPT_DIR
+disable=SC1090,SC1091

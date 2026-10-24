@@ -1,0 +1,56 @@
+name: "CI Pipeline"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  syntax:
+    name: "✨ Syntax & Permissions Check"
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 Validate Executable Permissions
+        run: |
+          test -x devlab || (echo "❌ 'devlab' CLI must be executable (chmod +x devlab)" && exit 1)
+          echo "✅ devlab is executable."
+
+      - name: 📜 Validate Bash Syntax (bash -n)
+        run: |
+          for script in devlab lib/*.sh; do
+            echo "Checking $script..."
+            bash -n "$script" || exit 1
+          done
+          echo "✅ All bash scripts passed syntax validation."
+
+      - name: ⚙️ Validate Environment Configurations
+        run: |
+          for envfile in config/platform.env config/apps/*.env; do
+            echo "Validating $envfile..."
+            bash -n "$envfile" || exit 1
+          done
+          echo "✅ All environment blueprints passed syntax validation."
+
+  shellcheck:
+    name: "🛡️ ShellCheck"
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🛡️ Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: "./lib"
+          additional_files: "devlab"
+          severity: "warning"
+        env:
+          SHELLCHECK_OPTS: "-e SC1090 -e SC1091"
